@@ -14,7 +14,7 @@
   [./bndsimport]
     type = SolutionUserObject
     mesh = BoundaryMap.e
-    system_variables = bnds
+    system_variables = gb
     timestep = LATEST
     execute_on = initial
   [../]
@@ -76,6 +76,7 @@
     from_variable = bnds
     solution = 'bndsimport'
     variable = gb
+    scale_factor = -1
   [../]
   [./mobility_xx]
     type = MaterialRealTensorValueAux
@@ -193,7 +194,7 @@
 [Executioner]
   # Preconditioned JFNK (default)
   type = Transient
-  num_steps = 100
+  num_steps = 1000
   dt = 1
   solve_type = PJFNK
 

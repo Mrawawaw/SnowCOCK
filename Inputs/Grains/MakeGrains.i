@@ -5,16 +5,16 @@
   ny = 50
   nz = 0
   xmin = 0
-  xmax = 1000
+  xmax = 50
   ymin = 0
-  ymax = 1000
+  ymax = 50
   zmin = 0
   zmax = 0
   elem_type = QUAD4
 []
 
 [GlobalParams]
-  op_num = 10
+  op_num = 20
   var_name_base = grains
 []
 
@@ -26,7 +26,7 @@
 [ICs]
   [./PolycrystalICs]
     [./PolycrystalVoronoiIC]
-      grain_num = 10
+      grain_num = 20
     [../]
   [../]
 []
@@ -64,7 +64,7 @@
     type = GBEvolution
     block = 0
     T = 500 # K
-    wGB = 60 # nm
+    wGB = 3 # nm
     GBmob0 = 2.5e-6 #m^4/(Js) from Schoenfelder 1997
     Q = 0.23 #Migration energy in eV
     GBenergy = 0.708 #GB energy in J/m^2
