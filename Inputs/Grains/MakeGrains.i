@@ -5,16 +5,16 @@
   ny = 50
   nz = 0
   xmin = 0
-  xmax = 50
+  xmax = 100 # nm?
   ymin = 0
-  ymax = 50
+  ymax = 100 # nm?
   zmin = 0
   zmax = 0
   elem_type = QUAD4
 []
 
 [GlobalParams]
-  op_num = 20
+  op_num = 4
   var_name_base = grains
 []
 
@@ -26,7 +26,7 @@
 [ICs]
   [./PolycrystalICs]
     [./PolycrystalVoronoiIC]
-      grain_num = 20
+      grain_num = 4
     [../]
   [../]
 []
@@ -45,7 +45,8 @@
 
 [AuxKernels]
   [./BndsCalc]
-    type = BndsCalcAux
+    type = GBCalcAux
+    #type = BndsCalcAux
     variable = bnds
     execute_on = timestep_end
   [../]
@@ -63,15 +64,22 @@
   [./Copper]
     type = GBEvolution
     block = 0
-    T = 500 # K
+    T = 300 # K
     wGB = 3 # nm
-    GBmob0 = 2.5e-6 #m^4/(Js) from Schoenfelder 1997
-    Q = 0.23 #Migration energy in eV
-    GBenergy = 0.708 #GB energy in J/m^2
+    GBmob0 = 2.5e-7 #m^4/(Js) from Schoenfelder 1997
+    Q = 0.023 #Migration energy in eV
+    GBenergy = 0.0708 #GB energy in J/m^2
   [../]
 []
 
 [Postprocessors]
+  [./MaxValue]
+    type = ElementExtremeValue
+    name = MaxVal
+    variable = bnds
+    execute_on = timestep_end
+    value_type = min
+  [../]
 []
 
 [Preconditioning]
@@ -97,8 +105,8 @@
   nl_max_its = 20
   nl_rel_tol = 1.0e-9
   start_time = 0.0
-  num_steps = 1
-  dt = 80.0
+  num_steps = 5
+  dt = 1
 
   #[./Adaptivity]
   #  # Block that turns on mesh adaptivity. Note that mesh will never coarsen beyond initial mesh (before uniform refinement)

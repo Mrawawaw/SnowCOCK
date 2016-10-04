@@ -11,7 +11,7 @@
 
 [Variables]
   [./c]
-    initial_condition = 0.01
+    initial_condition = 0.0
   [../]
   [./mu]
   [../]
@@ -170,7 +170,7 @@
     type = DirichletBC
     variable = c
     boundary = left
-    value = 0.02
+    value = 0.01
   [../]
   [./others]
     type = DiffusionFluxBC

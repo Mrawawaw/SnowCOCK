@@ -1,17 +1,17 @@
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  nx = 50 #grid points
-  ny = 25 #grid points
-  xmin = 0 #nm
-  xmax = 20 #nm
-  ymin = 0 #nm
-  ymax = 10 #nm
+  nx = 50
+  ny = 25
+  xmin = 0
+  xmax = 50
+  ymin = 0
+  ymax = 25
 []
 
 [Variables]
   [./c]
-    initial_condition = 0.01
+    #initial_condition = 0.1
   [../]
   [./mu]
   [../]
@@ -21,6 +21,7 @@
   [./gb]
     family = MONOMIAL
     order  = CONSTANT
+    initial_condition = 1
   [../]
   [./mobility_xx]
     family = MONOMIAL
@@ -68,9 +69,14 @@
 []
 
 [AuxKernels]
+  #[./gb]
+  #  type = FunctionAux
+  #  variable = gb
+  #  function = 'y0:=5.0;thk:=0.2;m:=2;r:=abs(y-y0);v:=exp(-(r/thk)^m);v'
+  #[../]
   [./gb]
     type = FunctionAux
-    variable = gb
+    variable = c
     function = 'y0:=5.0;thk:=0.2;m:=2;r:=abs(y-y0);v:=exp(-(r/thk)^m);v'
   [../]
   [./mobility_xx]
@@ -150,8 +156,8 @@
   [./aniso_tensor]
     type = GBDependentAnisotropicTensor
     gb = gb
-    bulk_parameter = 1 #?
-    gb_parameter = 1 #?
+    bulk_parameter = 1
+    gb_parameter = 1
     gb_normal_tensor_name = gb_normal
     gb_tensor_prop_name = aniso_tensor
   [../]
@@ -170,7 +176,7 @@
     type = DirichletBC
     variable = c
     boundary = left
-    value = 0.02
+    value = 0.01
   [../]
   [./others]
     type = DiffusionFluxBC
@@ -189,8 +195,8 @@
 [Executioner]
   # Preconditioned JFNK (default)
   type = Transient
-  num_steps = 1000
-  dt = 1
+  num_steps = 10000
+  dt = 10
   solve_type = PJFNK
 
   petsc_options_iname = '-pc_type -ksp_grmres_restart -sub_ksp_type -sub_pc_type -pc_asm_overlap'
@@ -198,7 +204,7 @@
 
   l_tol = 1e-3
   l_max_its = 20
-  nl_max_its = 6
+  nl_max_its = 5
 
   #[./TimeStepper]
   #  type = IterationAdaptiveDT

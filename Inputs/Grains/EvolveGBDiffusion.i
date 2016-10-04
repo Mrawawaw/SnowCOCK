@@ -10,16 +10,6 @@
   [../]
 []
 
-[UserObjects]
-  [./bndsimport]
-    type = SolutionUserObject
-    mesh = BoundaryMap.e
-    system_variables = gb
-    timestep = LATEST
-    execute_on = initial
-  [../]
-[]
-
 [AuxVariables]
   [./gb]
     family = MONOMIAL
@@ -51,32 +41,42 @@
   [../]
 []
 
+[UserObjects]
+  [./bndsimport]
+    type = SolutionUserObject
+    mesh = BoundaryMap.e
+    system_variables = bnds
+    timestep = LATEST
+    execute_on = initial
+  [../]
+[]
+
 [Kernels]
-  [./conc]
+  [./Concentration]
     type = CHSplitConcentration
     variable = c
     mobility = mobility_prop
     chemical_potential_var = mu
   [../]
-  [./chempot]
+  [./ChemicalPotential]
     type = CHSplitChemicalPotential
     variable = mu
     chemical_potential_prop = mu_prop
     c = c
   [../]
-  [./time]
+  [./Time]
     type = TimeDerivative
     variable = c
   [../]
 []
 
 [AuxKernels]
-  [./SolutionAux]
+  [./GBImportAuxKernel]
     type = SolutionAux
     from_variable = bnds
     solution = 'bndsimport'
     variable = gb
-    scale_factor = -1
+    #scale_factor = 1.0
   [../]
   [./mobility_xx]
     type = MaterialRealTensorValueAux
@@ -163,8 +163,8 @@
   [./diffusivity]
     type = GBDependentDiffusivity
     gb = gb
-    bulk_parameter = 0.01
-    gb_parameter = 10
+    bulk_parameter = 0.1
+    gb_parameter = 100
     gb_normal_tensor_name = gb_normal
     gb_tensor_prop_name = diffusivity
   [../]
@@ -174,14 +174,14 @@
   [./left]
     type = DirichletBC
     variable = c
-    boundary = left
+    boundary = 'left right top bottom'
     value = 0.2
   [../]
-  [./others]
-    type = DiffusionFluxBC
-    boundary = 'top bottom right'
-    variable = c
-  [../]
+  #[./others]
+  #  type = DiffusionFluxBC
+  #  boundary = 'top bottom right'
+  #  variable = c
+  #[../]
 []
 
 [Preconditioning]
@@ -195,8 +195,9 @@
   # Preconditioned JFNK (default)
   type = Transient
   num_steps = 1000
-  dt = 1
-  solve_type = PJFNK
+  dt = 0.5
+  #solve_type = PJFNK
+  solve_type = NEWTON
 
   petsc_options_iname = '-pc_type -ksp_grmres_restart -sub_ksp_type -sub_pc_type -pc_asm_overlap'
   petsc_options_value = 'asm      31                  preonly       lu           1'
@@ -220,5 +221,6 @@
 []
 
 [Outputs]
+  file_base = EvolvedDiffusion
   exodus = true
 []

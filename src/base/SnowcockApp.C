@@ -4,6 +4,8 @@
 #include "ModulesApp.h"
 #include "MooseSyntax.h"
 
+#include "GBCalcAux.h"
+
 template<>
 InputParameters validParams<SnowcockApp>()
 {
@@ -45,6 +47,7 @@ extern "C" void SnowcockApp__registerObjects(Factory & factory) { SnowcockApp::r
 void
 SnowcockApp::registerObjects(Factory & factory)
 {
+  registerKernel(GBCalcAux);
 }
 
 // External entry point for dynamic syntax association
