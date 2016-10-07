@@ -1,17 +1,17 @@
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  nx = 50
-  ny = 25
+  nx = 20
+  ny = 5
   xmin = 0
-  xmax = 50
+  xmax = 20
   ymin = 0
-  ymax = 25
+  ymax = 5
 []
 
 [Variables]
   [./c]
-    #initial_condition = 0.1
+    initial_condition = 0.0
   [../]
   [./mu]
   [../]
@@ -20,32 +20,32 @@
 [AuxVariables]
   [./gb]
     family = MONOMIAL
-    order  = CONSTANT
-    initial_condition = 1
+    order = CONSTANT
+    initial_condition = 1.0
   [../]
   [./mobility_xx]
     family = MONOMIAL
-    order  = CONSTANT
+    order = CONSTANT
   [../]
   [./mobility_yy]
     family = MONOMIAL
-    order  = CONSTANT
+    order = CONSTANT
   [../]
   [./diffusivity_xx]
     family = MONOMIAL
-    order  = CONSTANT
+    order = CONSTANT
   [../]
   [./diffusivity_yy]
     family = MONOMIAL
-    order  = CONSTANT
+    order = CONSTANT
   [../]
   [./aniso_tensor_xx]
     family = MONOMIAL
-    order  = CONSTANT
+    order = CONSTANT
   [../]
   [./aniso_tensor_yy]
     family = MONOMIAL
-    order  = CONSTANT
+    order = CONSTANT
   [../]
 []
 
@@ -119,13 +119,13 @@
     block = 0
     f_name = mu_prop
     args = c
-    function = 'c'
+    function = c
     derivative_order = 1
   [../]
   [./var_dependence]
     type = DerivativeParsedMaterial
     block = 0
-    function = 'c*(1.0-c)'
+    function = c*(1.0-c)
     args = c
     f_name = var_dep
     derivative_order = 1
@@ -146,70 +146,91 @@
   [./aniso_tensor]
     type = GBDependentAnisotropicTensor
     gb = gb
-    bulk_parameter = 1
-    gb_parameter = 1
+    bulk_parameter = 0.0088299 # nm2/s at 330*C (8.82993e-21 m^2/s)
+    gb_parameter = 219.60800 # nm2/s at 330*C (2.19608e-16 m^2/s)
     gb_normal_tensor_name = gb_normal
     gb_tensor_prop_name = aniso_tensor
   [../]
   [./diffusivity]
     type = GBDependentDiffusivity
     gb = gb
-    bulk_parameter = 0.0088299 #nm2/s at 330*C (8.82993e-21 m^2/s)
-    gb_parameter = 219.60800 #m2/s at 330*C (2.19608e-16 m^2/s)
+    bulk_parameter = 0.0088299 # nm2/s at 330*C (8.82993e-21 m^2/s)
+    gb_parameter = 219.60800 # nm2/s at 330*C (2.19608e-16 m^2/s)
     gb_normal_tensor_name = gb_normal
     gb_tensor_prop_name = diffusivity
   [../]
 []
 
 [BCs]
-  [./left]
-    type = DirichletBC
+  #[./left]
+  #  type = DirichletBC
+  #  variable = 'c mu'
+  #  boundary = left
+  #  value = 0.01
+  #[../]
+  #[./right]
+  #  type = DiffusionFluxBC
+  #  boundary = right
+  #  variable = 'c mu'
+  #[../]
+  [./in_flux]
+    type = CahnHilliardFluxBC
     variable = c
     boundary = left
-    value = 0.01
+    flux = '0.05 0 0'
+    #mob_name = M
+    #args = 'c d'
   [../]
-  [./others]
-    type = DiffusionFluxBC
-    boundary = 'top bottom right'
+  [./out_flux]
+    type = CahnHilliardFluxBC
     variable = c
+    boundary = right
+    flux = '0 0 0' # This allows exhaust flux where necessary, but won't 'pull' concentration
+    #mob_name = M
+    #args = 'c d'
   [../]
+  #[./Periodic]
+  #  [./Concentration]
+  #    variable = c
+  #    auto_direction = 'y'
+  #  [../]
+  #[../]
 []
 
 [Preconditioning]
   [./smp]
-     type = SMP
-     full = true
+    type = SMP
+    full = true
   [../]
 []
 
 [Executioner]
   # Preconditioned JFNK (default)
+  # [./TimeStepper]
+  # type = IterationAdaptiveDT
+  # dt = 25 # Initial time step.  In this simulation it changes.
+  # optimal_iterations = 6 # Time step will adapt to maintain this number of nonlinear iterations
+  # [../]
+  # [./Adaptivity]
+  # # Block that turns on mesh adaptivity. Note that mesh will never coarsen beyond initial mesh (before uniform refinement)
+  # initial_adaptivity = 4 # Number of times mesh is adapted to initial condition
+  # refine_fraction = 0.1 # Fraction of high error that will be refined
+  # coarsen_fraction = 0.1 # Fraction of low error that will coarsened
+  # max_h_level = 5 # Max number of refinements used, starting from initial mesh (before uniform refinement)
+  # [../]
   type = Transient
   num_steps = 10000
-  dt = 10
-  solve_type = PJFNK
-
+  dt = 1e-2
+  #solve_type = PJFNK
+  solve_type = Newton
   petsc_options_iname = '-pc_type -ksp_grmres_restart -sub_ksp_type -sub_pc_type -pc_asm_overlap'
   petsc_options_value = 'asm      31                  preonly       lu           1'
-
   l_tol = 1e-3
   l_max_its = 20
   nl_max_its = 5
-
-  #[./TimeStepper]
-  #  type = IterationAdaptiveDT
-  #  dt = 25 # Initial time step.  In this simulation it changes.
-  #  optimal_iterations = 6 # Time step will adapt to maintain this number of nonlinear iterations
-  #[../]
-  #[./Adaptivity]
-  #  # Block that turns on mesh adaptivity. Note that mesh will never coarsen beyond initial mesh (before uniform refinement)
-  #  initial_adaptivity = 4 # Number of times mesh is adapted to initial condition
-  #  refine_fraction = 0.1 # Fraction of high error that will be refined
-  #  coarsen_fraction = 0.1 # Fraction of low error that will coarsened
-  #  max_h_level = 5 # Max number of refinements used, starting from initial mesh (before uniform refinement)
-  #[../]
 []
 
 [Outputs]
   exodus = true
+  file_base = BCTest
 []

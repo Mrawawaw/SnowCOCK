@@ -150,8 +150,8 @@
   [./aniso_tensor]
     type = GBDependentAnisotropicTensor
     gb = gb
-    bulk_parameter = 1 #?
-    gb_parameter = 1 #?
+    bulk_parameter = 0.0088299 # nm2/s at 330*C (8.82993e-21 m^2/s)
+    gb_parameter = 219.60800 # nm2/s at 330*C (2.19608e-16 m^2/s)
     gb_normal_tensor_name = gb_normal
     gb_tensor_prop_name = aniso_tensor
   [../]

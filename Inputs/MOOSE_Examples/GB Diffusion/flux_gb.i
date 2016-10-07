@@ -1,19 +1,33 @@
 [Mesh]
-  file = BoundaryMap.e
+  type = GeneratedMesh
+  dim = 2
+  nx = 50
+  ny = 2
+  xmin = 0
+  xmax = 10
+  ymin = 0
+  ymax = 2
 []
 
 [Variables]
   [./c]
-    initial_condition = 0.1
+    [./InitialCondition]
+      type = FunctionIC
+      function = 'x0:=5.0;thk:=0.5;m:=2;r:=abs(x-x0);v:=exp(-(r/thk)^m);0.1+0.1*v'
+    [../]
   [../]
   [./mu]
+  [../]
+  [./jx]
+  [../]
+  [./jy]
   [../]
 []
 
 [AuxVariables]
   [./gb]
-    family = MONOMIAL
-    order  = CONSTANT
+    family = LAGRANGE
+    order  = FIRST
   [../]
   [./mobility_xx]
     family = MONOMIAL
@@ -41,42 +55,46 @@
   [../]
 []
 
-[UserObjects]
-  [./bndsimport]
-    type = SolutionUserObject
-    mesh = BoundaryMap.e
-    system_variables = bnds
-    timestep = LATEST
-    execute_on = initial
-  [../]
-[]
-
 [Kernels]
-  [./Concentration]
+  [./conc]
     type = CHSplitConcentration
     variable = c
     mobility = mobility_prop
     chemical_potential_var = mu
   [../]
-  [./ChemicalPotential]
+  [./chempot]
     type = CHSplitChemicalPotential
     variable = mu
     chemical_potential_prop = mu_prop
     c = c
   [../]
-  [./Time]
+  [./flux_x]
+    type = CHSplitFlux
+    variable = jx
+    component = 0
+    mobility_name = mobility_prop
+    mu = mu
+    c = c
+  [../]
+  [./flux_y]
+    type = CHSplitFlux
+    variable = jy
+    component = 1
+    mobility_name = mobility_prop
+    mu = mu
+    c = c
+  [../]
+  [./time]
     type = TimeDerivative
     variable = c
   [../]
 []
 
 [AuxKernels]
-  [./GBImportAuxKernel]
-    type = SolutionAux
-    from_variable = bnds
-    solution = 'bndsimport'
+  [./gb]
+    type = FunctionAux
     variable = gb
-    #scale_factor = 1.0
+    function = 'x0:=5.0;thk:=0.5;m:=2;r:=abs(x-x0);v:=exp(-(r/thk)^m);v'
   [../]
   [./mobility_xx]
     type = MaterialRealTensorValueAux
@@ -155,8 +173,8 @@
   [./aniso_tensor]
     type = GBDependentAnisotropicTensor
     gb = gb
-    bulk_parameter = 0.01
-    gb_parameter = 10
+    bulk_parameter = 0.1
+    gb_parameter = 1
     gb_normal_tensor_name = gb_normal
     gb_tensor_prop_name = aniso_tensor
   [../]
@@ -164,24 +182,31 @@
     type = GBDependentDiffusivity
     gb = gb
     bulk_parameter = 0.1
-    gb_parameter = 100
+    gb_parameter = 1
     gb_normal_tensor_name = gb_normal
     gb_tensor_prop_name = diffusivity
   [../]
 []
 
 [BCs]
-  [./left]
-    type = DirichletBC
-    variable = c
-    boundary = 'left right top bottom'
-    value = 0.2
+  [./Periodic]
+    [./all]
+      auto_direction = 'x y'
+    [../]
   [../]
-  #[./others]
-  #  type = DiffusionFluxBC
-  #  boundary = 'top bottom right'
-  #  variable = c
-  #[../]
+[]
+
+[Executioner]
+  # Preconditioned JFNK (default)
+  type = Transient
+  solve_type = PJFNK
+
+  petsc_options_iname = '-pc_type -ksp_grmres_restart -sub_ksp_type -sub_pc_type -pc_asm_overlap'
+  petsc_options_value = 'asm      31                  preonly       lu           1'
+
+  nl_max_its = 5
+  dt = 20
+  num_steps = 5
 []
 
 [Preconditioning]
@@ -191,36 +216,6 @@
   [../]
 []
 
-[Executioner]
-  # Preconditioned JFNK (default)
-  type = Transient
-  num_steps = 1000
-  dt = 0.5
-  #solve_type = PJFNK
-  solve_type = NEWTON
-
-  petsc_options_iname = '-pc_type -ksp_grmres_restart -sub_ksp_type -sub_pc_type -pc_asm_overlap'
-  petsc_options_value = 'asm      31                  preonly       lu           1'
-
-  l_tol = 1e-3
-  l_max_its = 20
-  nl_max_its = 5
-
-  #[./TimeStepper]
-  #  type = IterationAdaptiveDT
-  #  dt = 25 # Initial time step.  In this simulation it changes.
-  #  optimal_iterations = 6 # Time step will adapt to maintain this number of nonlinear iterations
-  #[../]
-  #[./Adaptivity]
-  #  # Block that turns on mesh adaptivity. Note that mesh will never coarsen beyond initial mesh (before uniform refinement)
-  #  initial_adaptivity = 4 # Number of times mesh is adapted to initial condition
-  #  refine_fraction = 0.1 # Fraction of high error that will be refined
-  #  coarsen_fraction = 0.1 # Fraction of low error that will coarsened
-  #  max_h_level = 5 # Max number of refinements used, starting from initial mesh (before uniform refinement)
-  #[../]
-[]
-
 [Outputs]
-  file_base = EvolvedDiffusion
   exodus = true
 []

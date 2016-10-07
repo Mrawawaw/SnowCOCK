@@ -1,17 +1,17 @@
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  nx = 50
-  ny = 25
+  nx = 20
+  ny = 5
   xmin = 0
-  xmax = 50
+  xmax = 20
   ymin = 0
-  ymax = 25
+  ymax = 5
 []
 
 [Variables]
   [./c]
-    initial_condition = 0.01
+    initial_condition = 0.0
   [../]
   [./mu]
   [../]
@@ -21,7 +21,7 @@
   [./gb]
     family = MONOMIAL
     order = CONSTANT
-    initial_condition = 1
+    initial_condition = 1.0
   [../]
   [./mobility_xx]
     family = MONOMIAL
@@ -146,8 +146,8 @@
   [./aniso_tensor]
     type = GBDependentAnisotropicTensor
     gb = gb
-    bulk_parameter = 1
-    gb_parameter = 1
+    bulk_parameter = 0.0088299 # nm2/s at 330*C (8.82993e-21 m^2/s)
+    gb_parameter = 219.60800 # nm2/s at 330*C (2.19608e-16 m^2/s)
     gb_normal_tensor_name = gb_normal
     gb_tensor_prop_name = aniso_tensor
   [../]
@@ -155,24 +155,46 @@
     type = GBDependentDiffusivity
     gb = gb
     bulk_parameter = 0.0088299 # nm2/s at 330*C (8.82993e-21 m^2/s)
-    gb_parameter = 219.60800 # m2/s at 330*C (2.19608e-16 m^2/s)
+    gb_parameter = 219.60800 # nm2/s at 330*C (2.19608e-16 m^2/s)
     gb_normal_tensor_name = gb_normal
     gb_tensor_prop_name = diffusivity
   [../]
 []
 
 [BCs]
-  [./left]
-    type = DirichletBC
+  #[./left]
+  #  type = DirichletBC
+  #  variable = 'c mu'
+  #  boundary = left
+  #  value = 0.01
+  #[../]
+  #[./right]
+  #  type = DiffusionFluxBC
+  #  boundary = right
+  #  variable = 'c mu'
+  #[../]
+  [./in_flux]
+    type = CahnHilliardFluxBC
     variable = c
     boundary = left
-    value = 0.02
+    flux = '0.05 0 0'
+    #mob_name = M
+    #args = 'c d'
   [../]
-  [./others]
-    type = DiffusionFluxBC
-    boundary = 'top bottom right'
+  [./out_flux]
+    type = CahnHilliardFluxBC
     variable = c
+    boundary = right
+    flux = '0 0 0' # This allows exhaust flux where necessary, but won't 'pull' concentration
+    #mob_name = M
+    #args = 'c d'
   [../]
+  #[./Periodic]
+  #  [./Concentration]
+  #    variable = c
+  #    auto_direction = 'y'
+  #  [../]
+  #[../]
 []
 
 [Preconditioning]
@@ -198,8 +220,9 @@
   # [../]
   type = Transient
   num_steps = 10000
-  dt = 10
-  solve_type = PJFNK
+  dt = 1e-2
+  #solve_type = PJFNK
+  solve_type = Newton
   petsc_options_iname = '-pc_type -ksp_grmres_restart -sub_ksp_type -sub_pc_type -pc_asm_overlap'
   petsc_options_value = 'asm      31                  preonly       lu           1'
   l_tol = 1e-3
@@ -209,5 +232,5 @@
 
 [Outputs]
   exodus = true
-  file_base = BCTest3
+  file_base = BCTest
 []

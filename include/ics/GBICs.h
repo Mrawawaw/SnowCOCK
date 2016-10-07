@@ -28,6 +28,11 @@ protected:
 
   unsigned int _ncrys;
   std::vector<const VariableValue *> _vals;
+  Real Array bnds
+
+//private:
+  Real MinVal;
+  Real MaxVal;
 
 };
 

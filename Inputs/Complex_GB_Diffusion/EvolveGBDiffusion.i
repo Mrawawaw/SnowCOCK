@@ -1,17 +1,10 @@
 [Mesh]
-  type = GeneratedMesh
-  dim = 2
-  nx = 50
-  ny = 25
-  xmin = 0
-  xmax = 50
-  ymin = 0
-  ymax = 25
+  file = BoundaryMap.e
 []
 
 [Variables]
   [./c]
-    #initial_condition = 0.1
+    initial_condition = 0.0
   [../]
   [./mu]
   [../]
@@ -21,7 +14,6 @@
   [./gb]
     family = MONOMIAL
     order  = CONSTANT
-    initial_condition = 1
   [../]
   [./mobility_xx]
     family = MONOMIAL
@@ -49,35 +41,42 @@
   [../]
 []
 
+[UserObjects]
+  [./bndsimport]
+    type = SolutionUserObject
+    mesh = BoundaryMap.e
+    system_variables = bnds
+    timestep = LATEST
+    execute_on = initial
+  [../]
+[]
+
 [Kernels]
-  [./conc]
+  [./Concentration]
     type = CHSplitConcentration
     variable = c
     mobility = mobility_prop
     chemical_potential_var = mu
   [../]
-  [./chempot]
+  [./ChemicalPotential]
     type = CHSplitChemicalPotential
     variable = mu
     chemical_potential_prop = mu_prop
     c = c
   [../]
-  [./time]
+  [./Time]
     type = TimeDerivative
     variable = c
   [../]
 []
 
 [AuxKernels]
-  #[./gb]
-  #  type = FunctionAux
-  #  variable = gb
-  #  function = 'y0:=5.0;thk:=0.2;m:=2;r:=abs(y-y0);v:=exp(-(r/thk)^m);v'
-  #[../]
-  [./gb]
-    type = FunctionAux
-    variable = c
-    function = 'y0:=5.0;thk:=0.2;m:=2;r:=abs(y-y0);v:=exp(-(r/thk)^m);v'
+  [./GBImportAuxKernel]
+    type = SolutionAux
+    from_variable = bnds
+    solution = 'bndsimport'
+    variable = gb
+    #scale_factor = 1.0
   [../]
   [./mobility_xx]
     type = MaterialRealTensorValueAux
@@ -156,16 +155,16 @@
   [./aniso_tensor]
     type = GBDependentAnisotropicTensor
     gb = gb
-    bulk_parameter = 1
-    gb_parameter = 1
+    bulk_parameter = 0.0088299 # nm2/s at 330*C (8.82993e-21 m^2/s)
+    gb_parameter = 219.60800 # nm2/s at 330*C (2.19608e-16 m^2/s)
     gb_normal_tensor_name = gb_normal
     gb_tensor_prop_name = aniso_tensor
   [../]
   [./diffusivity]
     type = GBDependentDiffusivity
     gb = gb
-    bulk_parameter = 0.0088299 #nm2/s at 330*C (8.82993e-21 m^2/s)
-    gb_parameter = 219.60800 #m2/s at 330*C (2.19608e-16 m^2/s)
+    bulk_parameter = 0.0088299 # nm2/s at 330*C (8.82993e-21 m^2/s)
+    gb_parameter = 219.60800 # nm2/s at 330*C (2.19608e-16 m^2/s)
     gb_normal_tensor_name = gb_normal
     gb_tensor_prop_name = diffusivity
   [../]
@@ -175,14 +174,14 @@
   [./left]
     type = DirichletBC
     variable = c
-    boundary = left
-    value = 0.01
+    boundary = 'left right top bottom'
+    value = 0.2
   [../]
-  [./others]
-    type = DiffusionFluxBC
-    boundary = 'top bottom right'
-    variable = c
-  [../]
+  #[./others]
+  #  type = DiffusionFluxBC
+  #  boundary = 'top bottom right'
+  #  variable = c
+  #[../]
 []
 
 [Preconditioning]
@@ -195,9 +194,10 @@
 [Executioner]
   # Preconditioned JFNK (default)
   type = Transient
-  num_steps = 10000
-  dt = 10
-  solve_type = PJFNK
+  num_steps = 1000
+  dt = 0.5
+  #solve_type = PJFNK
+  solve_type = NEWTON
 
   petsc_options_iname = '-pc_type -ksp_grmres_restart -sub_ksp_type -sub_pc_type -pc_asm_overlap'
   petsc_options_value = 'asm      31                  preonly       lu           1'
@@ -221,5 +221,6 @@
 []
 
 [Outputs]
+  file_base = EvolvedDiffusion
   exodus = true
 []
