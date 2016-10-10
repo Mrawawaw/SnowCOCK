@@ -5,6 +5,7 @@
 #include "MooseSyntax.h"
 
 #include "GBCalcAux.h"
+#include "GBICs.h"
 
 template<>
 InputParameters validParams<SnowcockApp>()
@@ -48,6 +49,7 @@ void
 SnowcockApp::registerObjects(Factory & factory)
 {
   registerKernel(GBCalcAux);
+  registerInitialCondition(GBICs);
 }
 
 // External entry point for dynamic syntax association

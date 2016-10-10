@@ -4,36 +4,40 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#ifndef GBCALCAUX_H
-#define GBCALCAUX_H
+#ifndef GBICs_H
+#define GBICs_H
 
-#include "AuxKernel.h"
+#include "Kernel.h"
+#include "InitialCondition.h"
 
-//Forward Declarations
-class GBCalcAux;
+#include <string>
+
+// Forward Declarations
+class GBICs;
 
 template<>
-InputParameters validParams<GBCalcAux>();
+InputParameters validParams<GBICs>();
 
 /**
- * Visualize the location of grain boundaries in a polycrystalline simulation.
- */
-class GBCalcAux : public AuxKernel
+ * PolycrystalReducedIC creates a polycrystal initial condition.
+ * With 2 Grains, _typ = 0 results in a circular inclusion grain and _type = 1 gives a bicrystal.
+ * With more than 2 grains, _typ = 0 gives set positions for 6 grains, _type = 1 gives hexagonal grains for 4 grains.
+ *                          _typ = 2 Gives a random voronoi structure
+*/
+class GBICs : public InitialCondition
 {
 public:
-  GBCalcAux(const InputParameters & parameters);
+  GBICs(const InputParameters & parameters);
+  virtual Real value(const Point & p);
 
 protected:
-  virtual Real computeValue();
-
-  unsigned int _ncrys;
-  std::vector<const VariableValue *> _vals;
-  Real Array bnds
+  Real bnds;
 
 //private:
-  Real MinVal;
-  Real MaxVal;
+  Real _MinVal;
+  Real _MaxVal;
+  Real _bnds;
 
 };
 
-#endif //GBCALCAUX_H
+#endif //GBICs_H

@@ -73,6 +73,22 @@
 []
 
 [Postprocessors]
+  [./MinVal]
+    type = ElementExtremeValue
+    block = 0
+    execute_on = timestep_end
+    value_type = min
+    variable = bnds
+    outputs = exodus
+  [../]
+  [./MaxVal]
+    type = ElementExtremeValue
+    block = 0
+    execute_on = timestep_end
+    value_type = max
+    variable = bnds
+    outputs = exodus
+  [../]
 []
 
 [Preconditioning]
@@ -89,7 +105,6 @@
 
   #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
-
 
   petsc_options_iname = '-pc_type -pc_hypre_type -ksp_gmres_restart'
   petsc_options_value = 'hypre boomeramg 31'

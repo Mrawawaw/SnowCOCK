@@ -10,6 +10,13 @@
   [../]
 []
 
+[ICs]
+  [./GBinit]
+  type = GBICs
+  variable = gb
+  [../]
+[]
+
 [AuxVariables]
   [./gb]
     family = MONOMIAL
