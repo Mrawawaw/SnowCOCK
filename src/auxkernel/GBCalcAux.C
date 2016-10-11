@@ -15,8 +15,8 @@ InputParameters validParams<GBCalcAux>()
   return params;
 }
 
-GBCalcAux::GBCalcAux(const InputParameters & parameters) :
-    AuxKernel(parameters),
+GBCalcAux::GBCalcAux(const InputParameters & params) :
+    AuxKernel(params),
     _ncrys(coupledComponents("v")),
     _vals(_ncrys)
 {

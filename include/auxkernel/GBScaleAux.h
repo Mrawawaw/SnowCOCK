@@ -4,29 +4,33 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#ifndef GBCALCAUX_H
-#define GBCALCAUX_H
+#ifndef GBSCALEAUX_H
+#define GBSCALEAUX_H
 
 #include "AuxKernel.h"
 
 //Forward Declarations
-class GBCalcAux;
+class GBScaleAux;
 
 template<>
-InputParameters validParams<GBCalcAux>();
+InputParameters validParams<GBScaleAux>();
 
 /**
  * Visualize the location of grain boundaries in a polycrystalline simulation.
  */
-class GBCalcAux : public AuxKernel
+class GBScaleAux : public AuxKernel
 {
 public:
-  GBCalcAux(const InputParameters & params);
+  GBScaleAux(const InputParameters & params);
 
 protected:
   virtual Real computeValue();
-  unsigned int _ncrys;
-  std::vector<const VariableValue *> _vals;
+  const VariableValue & _bnds;
+  //const VariableValue & _bnds;
+  //std::vector<const VariableValue *> _bnds;
+  Function & _MinFun;
+  Function & _MaxFun;
+
 };
 
-#endif //GBCALCAUX_H
+#endif //GBScaleAux_H
