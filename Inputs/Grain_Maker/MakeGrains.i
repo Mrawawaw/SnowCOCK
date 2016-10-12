@@ -126,6 +126,6 @@
 []
 
 [Outputs]
-  file_base = BoundaryMap
+  file_base = MakeGrains/BoundaryMap
   exodus = true
 []

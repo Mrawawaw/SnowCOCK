@@ -89,14 +89,16 @@
     value = 1*a
     vars = 'a'
     vals = 'MinVal'
-    execute_on = timestep_end
+    execute_on = timestep_begin
+    #execute_on = nonlinear
   [../]
   [./MaxScaleFunction]
     type = ParsedFunction
     value = 1*a
     vars = 'a'
     vals = 'MaxVal'
-    execute_on = timestep_end
+    execute_on = timestep_begin
+    #execute_on = nonlinear
   [../]
 []
 
@@ -104,14 +106,16 @@
   [./MinVal]
     type = ElementExtremeValue
     block = 0
-    execute_on = timestep_begin
+    execute_on = timestep_end
+    #execute_on = linear
     value_type = min
     variable = bnds
   [../]
   [./MaxVal]
     type = ElementExtremeValue
     block = 0
-    execute_on = timestep_begin
+    execute_on = timestep_end
+    #execute_on = linear
     value_type = max
     variable = bnds
   [../]
@@ -139,19 +143,32 @@
   nl_max_its = 20
   nl_rel_tol = 1.0e-9
   start_time = 0.0
-  num_steps = 1000
+  num_steps = 20
   dt = 1
 
-  #[./Adaptivity]
-  #  # Block that turns on mesh adaptivity. Note that mesh will never coarsen beyond initial mesh (before uniform refinement)
-  #  initial_adaptivity = 4 # Number of times mesh is adapted to initial condition
-  #  refine_fraction = 0.1 # Fraction of high error that will be refined
-  #  coarsen_fraction = 0.1 # Fraction of low error that will coarsened
-  #  max_h_level = 5 # Max number of refinements used, starting from initial mesh (before uniform refinement)
-  #[../]
+  [./Adaptivity]
+    # Block that turns on mesh adaptivity. Note that mesh will never coarsen beyond initial mesh (before uniform refinement)
+    marker = error_frac
+    max_h_level = 3 max_h_level = 8 # Max number of refinements used, starting from initial mesh (before uniform refinement)
+    [./Indicators]
+      [./bnds_jump]
+        type = GradientJumpIndicator
+        variable = bnds
+        scale_by_flux_faces = true
+      [../]
+    [../]
+    [./Markers]
+      [./error_frac]
+        type = ErrorFractionMarker
+        coarsen = 0.1 # Fraction of low error that will coarsened
+        indicator = bnds_jump
+        refine = 0.6 # Fraction of high error that will be refined
+      [../]
+    [../]
+  [../]
 []
 
 [Outputs]
-  file_base = BoundaryMap
+  file_base = MakeGrains2/BoundaryMap_Adaptive
   exodus = true
 []
