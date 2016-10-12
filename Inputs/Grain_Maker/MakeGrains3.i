@@ -89,14 +89,14 @@
     value = 1*a
     vars = 'a'
     vals = 'MinVal'
-    execute_on = timestep_end
+    execute_on = nonlinear
   [../]
   [./MaxScaleFunction]
     type = ParsedFunction
     value = 1*a
     vars = 'a'
     vals = 'MaxVal'
-    execute_on = timestep_end
+    execute_on = nonlinear
   [../]
 []
 
@@ -104,14 +104,14 @@
   [./MinVal]
     type = ElementExtremeValue
     block = 0
-    execute_on = timestep_begin
+    execute_on = linear
     value_type = min
     variable = bnds
   [../]
   [./MaxVal]
     type = ElementExtremeValue
     block = 0
-    execute_on = timestep_begin
+    execute_on = linear
     value_type = max
     variable = bnds
   [../]
