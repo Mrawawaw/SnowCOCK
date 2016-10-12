@@ -206,21 +206,15 @@
 
 [Executioner]
   # Preconditioned JFNK (default)
-  # [./TimeStepper]
-  # type = IterationAdaptiveDT
-  # dt = 25 # Initial time step.  In this simulation it changes.
-  # optimal_iterations = 6 # Time step will adapt to maintain this number of nonlinear iterations
-  # [../]
-  # [./Adaptivity]
-  # # Block that turns on mesh adaptivity. Note that mesh will never coarsen beyond initial mesh (before uniform refinement)
-  # initial_adaptivity = 4 # Number of times mesh is adapted to initial condition
-  # refine_fraction = 0.1 # Fraction of high error that will be refined
-  # coarsen_fraction = 0.1 # Fraction of low error that will coarsened
-  # max_h_level = 5 # Max number of refinements used, starting from initial mesh (before uniform refinement)
-  # [../]
+  [./TimeStepper]
+   type = IterationAdaptiveDT
+   dt = 1e-2 # Initial time step.  In this simulation it changes.
+   optimal_iterations = 6 # Time step will adapt to maintain this number of nonlinear iterations
+  [../]
+
   type = Transient
   num_steps = 10000
-  dt = 1e-2
+  #dt = 1e-2
   #solve_type = PJFNK
   solve_type = Newton
   petsc_options_iname = '-pc_type -ksp_grmres_restart -sub_ksp_type -sub_pc_type -pc_asm_overlap'

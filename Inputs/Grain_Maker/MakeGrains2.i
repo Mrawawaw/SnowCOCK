@@ -36,7 +36,7 @@
     order = FIRST
     family = LAGRANGE
   [../]
-  [./outbnds]
+  [./bndsout]
     order = FIRST
     family = LAGRANGE
   [../]
@@ -55,7 +55,7 @@
   [../]
   [./BndsScale]
     type = GBScaleAux # Custom calculator
-    variable = outbnds
+    variable = bndsout
     inbnds = bnds
     execute_on = timestep_end
     MinFunction = MinScaleFunction
@@ -145,30 +145,30 @@
   start_time = 0.0
   num_steps = 20
   dt = 1
+[]
 
-  [./Adaptivity]
-    # Block that turns on mesh adaptivity. Note that mesh will never coarsen beyond initial mesh (before uniform refinement)
-    marker = error_frac
-    max_h_level = 3 max_h_level = 8 # Max number of refinements used, starting from initial mesh (before uniform refinement)
-    [./Indicators]
-      [./bnds_jump]
-        type = GradientJumpIndicator
-        variable = bnds
-        scale_by_flux_faces = true
-      [../]
+[Adaptivity]
+  # Block that turns on mesh adaptivity. Note that mesh will never coarsen beyond initial mesh (before uniform refinement)
+  marker = error_frac
+  max_h_level = 3 # Max number of refinements used, starting from initial mesh (before uniform refinement)
+  [./Indicators]
+    [./bnds_jump]
+      type = GradientJumpIndicator
+      variable = bnds
+      scale_by_flux_faces = true
     [../]
-    [./Markers]
-      [./error_frac]
-        type = ErrorFractionMarker
-        coarsen = 0.1 # Fraction of low error that will coarsened
-        indicator = bnds_jump
-        refine = 0.6 # Fraction of high error that will be refined
-      [../]
+  [../]
+  [./Markers]
+    [./error_frac]
+      type = ErrorFractionMarker
+      coarsen = 0.1 # Fraction of low error that will coarsened
+      indicator = bnds_jump
+      refine = 0.6 # Fraction of high error that will be refined
     [../]
   [../]
 []
 
 [Outputs]
-  file_base = MakeGrains2/BoundaryMap_Adaptive
+  file_base = MakeGrains2_Adaptive/BoundaryMap_Adaptive
   exodus = true
 []
