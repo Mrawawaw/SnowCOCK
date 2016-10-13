@@ -7,6 +7,7 @@
 #include "GBCalcAux.h"
 #include "GBScaleAux.h"
 #include "GBICs.h"
+#include "GBDiffOutflowBC.h"
 
 template<>
 InputParameters validParams<SnowcockApp>()
@@ -52,6 +53,7 @@ SnowcockApp::registerObjects(Factory & factory)
   registerKernel(GBCalcAux);
   registerKernel(GBScaleAux);
   //registerInitialCondition(GBICs);
+  registerBoundaryCondition(GBDiffOutflowBC);
 }
 
 // External entry point for dynamic syntax association
