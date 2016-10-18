@@ -162,17 +162,6 @@
 []
 
 [BCs]
-  #[./left]
-  #  type = DirichletBC
-  #  variable = 'c mu'
-  #  boundary = left
-  #  value = 0.01
-  #[../]
-  #[./right]
-  #  type = DiffusionFluxBC
-  #  boundary = right
-  #  variable = 'c mu'
-  #[../]
   [./in_flux]
     type = CahnHilliardFluxBC
     variable = c
@@ -181,20 +170,19 @@
     #mob_name = M
     #args = 'c d'
   [../]
-  [./out_flux]
-    type = CahnHilliardFluxBC
-    variable = c
-    boundary = right
-    flux = '0 0 0' # This allows exhaust flux where necessary, but won't 'pull' concentration
+  #[./out_flux]
+  #  type = CahnHilliardFluxBC
+  #  variable = c
+  #  boundary = right
+  #  flux = '0 0 0' # This allows exhaust flux where necessary, but won't 'pull' concentration
     #mob_name = M
     #args = 'c d'
-  [../]
-  #[./Periodic]
-  #  [./Concentration]
-  #    variable = c
-  #    auto_direction = 'y'
-  #  [../]
   #[../]
+  [./out_flux]
+    type = GBDiffOutflowBC
+    variable = c
+    Diffusivity_Tensor = diffusivity_xx
+    boundary = right
 []
 
 [Preconditioning]
