@@ -2,16 +2,15 @@
   type = GeneratedMesh
   dim = 2
   nx = 50 #grid points
-  ny = 25 #grid points
+  ny = 10 #grid points
   xmin = 0 #nm
-  xmax = 20 #nm
+  xmax = 50 #nm
   ymin = 0 #nm
   ymax = 10 #nm
 []
 
 [Variables]
   [./c]
-    initial_condition = 0.01
   [../]
   [./mu]
   [../]
@@ -150,8 +149,8 @@
   [./aniso_tensor]
     type = GBDependentAnisotropicTensor
     gb = gb
-    bulk_parameter = 1 #?
-    gb_parameter = 1 #?
+    bulk_parameter = 0.0088299 # nm2/s at 330*C (8.82993e-21 m^2/s)
+    gb_parameter = 219.60800 # nm2/s at 330*C (2.19608e-16 m^2/s)
     gb_normal_tensor_name = gb_normal
     gb_tensor_prop_name = aniso_tensor
   [../]
@@ -159,23 +158,24 @@
     type = GBDependentDiffusivity
     gb = gb
     bulk_parameter = 0.0088299 #nm2/s at 330*C (8.82993e-21 m^2/s)
-    gb_parameter = 219.60800 #m2/s at 330*C (2.19608e-16 m^2/s)
+    gb_parameter = 219.60800 #nm2/s at 330*C (2.19608e-16 m^2/s)
     gb_normal_tensor_name = gb_normal
     gb_tensor_prop_name = diffusivity
   [../]
 []
 
 [BCs]
-  [./left]
-    type = DirichletBC
+  [./in_flux]
+    type = CahnHilliardFluxBC
     variable = c
     boundary = left
-    value = 0.02
+    flux = '0.001 0 0'
   [../]
-  [./others]
-    type = DiffusionFluxBC
-    boundary = 'top bottom right'
+  [./out_flux]
+    type = GBDiffOutflowBC
     variable = c
+    Diffusivity_Tensor = diffusivity_xx
+    boundary = right
   [../]
 []
 
@@ -189,8 +189,7 @@
 [Executioner]
   # Preconditioned JFNK (default)
   type = Transient
-  num_steps = 1000
-  dt = 1
+  num_steps = 10000
   solve_type = PJFNK
 
   petsc_options_iname = '-pc_type -ksp_grmres_restart -sub_ksp_type -sub_pc_type -pc_asm_overlap'
@@ -199,12 +198,15 @@
   l_tol = 1e-3
   l_max_its = 20
   nl_max_its = 6
+  dt = 0.1
 
   #[./TimeStepper]
-  #  type = IterationAdaptiveDT
-  #  dt = 25 # Initial time step.  In this simulation it changes.
-  #  optimal_iterations = 6 # Time step will adapt to maintain this number of nonlinear iterations
+  # type = IterationAdaptiveDT
+  # dt = 1e-4 # Initial time step.  In this simulation it changes.
+  # max_dt = 1
+  # optimal_iterations = 6 # Time step will adapt to maintain this number of nonlinear iterations
   #[../]
+
   #[./Adaptivity]
   #  # Block that turns on mesh adaptivity. Note that mesh will never coarsen beyond initial mesh (before uniform refinement)
   #  initial_adaptivity = 4 # Number of times mesh is adapted to initial condition
@@ -216,4 +218,5 @@
 
 [Outputs]
   exodus = true
+  file_base = SGBD
 []
